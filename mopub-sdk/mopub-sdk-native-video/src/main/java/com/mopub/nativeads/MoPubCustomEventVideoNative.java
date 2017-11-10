@@ -306,6 +306,19 @@ public class MoPubCustomEventVideoNative extends CustomEventNative {
                     mVideoResponseHeaders.getImpressionVisibleMs();
             visibilityTrackingEvents.add(visibilityTrackingEvent);
 
+            // VAST impression trackers
+            for (final VastTracker vastTracker : vastVideoConfig.getImpressionTrackers()) {
+                final VisibilityTrackingEvent vastImpressionTrackingEvent =
+                        new VisibilityTrackingEvent();
+                vastImpressionTrackingEvent.strategy = new PayloadVisibilityStrategy(mContext,
+                        vastTracker.getContent());
+                vastImpressionTrackingEvent.minimumPercentageVisible =
+                        mVideoResponseHeaders.getImpressionMinVisiblePercent();
+                vastImpressionTrackingEvent.totalRequiredPlayTimeMs =
+                        mVideoResponseHeaders.getImpressionVisibleMs();
+                visibilityTrackingEvents.add(vastImpressionTrackingEvent);
+            }
+
             // Visibility tracking event from http response Vast payload
             mVastVideoConfig = vastVideoConfig;
             final VideoViewabilityTracker vastVideoViewabilityTracker =
@@ -315,7 +328,7 @@ public class MoPubCustomEventVideoNative extends CustomEventNative {
                         new VisibilityTrackingEvent();
                 vastVisibilityTrackingEvent.strategy =
                         new PayloadVisibilityStrategy(mContext,
-                                vastVideoViewabilityTracker.getTrackingUrl());
+                                vastVideoViewabilityTracker.getContent());
                 vastVisibilityTrackingEvent.minimumPercentageVisible =
                         vastVideoViewabilityTracker.getPercentViewable();
                 vastVisibilityTrackingEvent.totalRequiredPlayTimeMs =
@@ -609,8 +622,7 @@ public class MoPubCustomEventVideoNative extends CustomEventNative {
             } else if (mEnded) {
                 newState = VideoState.ENDED;
             } else {
-                if (mLatestVideoControllerState == NativeVideoController.STATE_PREPARING
-                        || mLatestVideoControllerState == NativeVideoController.STATE_IDLE) {
+                if (mLatestVideoControllerState == NativeVideoController.STATE_IDLE) {
                     newState = VideoState.LOADING;
                 } else if (mLatestVideoControllerState == NativeVideoController.STATE_BUFFERING) {
                     newState = VideoState.BUFFERING;

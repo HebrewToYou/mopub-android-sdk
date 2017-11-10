@@ -25,12 +25,15 @@ public enum ResponseHeader {
     LOCATION("Location"),
     USER_AGENT("User-Agent"),
     ACCEPT_LANGUAGE("Accept-Language"),
+    BROWSER_AGENT("X-Browser-Agent"),
+
+    // Native fields
+    IMPRESSION_MIN_VISIBLE_PERCENT("X-Impression-Min-Visible-Percent"),
+    IMPRESSION_VISIBLE_MS("X-Impression-Visible-Ms"),
 
     // Native Video fields
     PLAY_VISIBLE_PERCENT("X-Play-Visible-Percent"),
     PAUSE_VISIBLE_PERCENT("X-Pause-Visible-Percent"),
-    IMPRESSION_MIN_VISIBLE_PERCENT("X-Impression-Min-Visible-Percent"),
-    IMPRESSION_VISIBLE_MS("X-Impression-Visible-Ms"),
     MAX_BUFFER_MS("X-Max-Buffer-Ms"),
 
     // Rewarded Ad fields
@@ -43,6 +46,10 @@ public enum ResponseHeader {
 
     // Internal Video Trackers
     VIDEO_TRACKERS("X-Video-Trackers"),
+
+    // Viewability fields
+    VIDEO_VIEWABILITY_TRACKERS("X-Video-Viewability-Trackers"),
+    DISABLE_VIEWABILITY("X-Disable-Viewability"),
 
     @Deprecated CUSTOM_SELECTOR("X-Customselector");
 

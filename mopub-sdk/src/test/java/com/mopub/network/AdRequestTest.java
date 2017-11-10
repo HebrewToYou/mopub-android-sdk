@@ -6,6 +6,7 @@ import android.location.Location;
 import com.mopub.common.AdFormat;
 import com.mopub.common.AdType;
 import com.mopub.common.DataKeys;
+import com.mopub.common.MoPub.BrowserAgent;
 import com.mopub.common.event.BaseEvent;
 import com.mopub.common.event.EventDispatcher;
 import com.mopub.common.event.MoPubEvents;
@@ -169,6 +170,22 @@ public class AdRequestTest {
         assertThat(serverExtras.get(DataKeys.IMPRESSION_MIN_VISIBLE_PERCENT)).isEqualTo("33");
         assertThat(serverExtras.get(DataKeys.IMPRESSION_VISIBLE_MS)).isEqualTo("2000");
         assertThat(serverExtras.get(DataKeys.MAX_BUFFER_MS)).isEqualTo("1000");
+    }
+
+    @Test
+    public void parseNetworkResponse_forNativeStatic_shouldSucceed() throws Exception {
+        defaultHeaders.put(ResponseHeader.AD_TYPE.getKey(), AdType.STATIC_NATIVE);
+        NetworkResponse testResponse = new NetworkResponse(200,
+                "{\"abc\": \"def\"}".getBytes(Charset.defaultCharset()), defaultHeaders, false);
+
+        final Response<AdResponse> response = subject.parseNetworkResponse(testResponse);
+
+        // Check the server extras
+        final Map<String, String> serverExtras = response.result.getServerExtras();
+        assertThat(serverExtras).isNotNull();
+        assertThat(serverExtras).isNotEmpty();
+        assertThat(serverExtras.get(DataKeys.IMPRESSION_MIN_VISIBLE_PERCENT)).isEqualTo("33");
+        assertThat(serverExtras.get(DataKeys.IMPRESSION_VISIBLE_MS)).isEqualTo("2000");
     }
 
     @Test
@@ -355,6 +372,50 @@ public class AdRequestTest {
     }
 
     @Test
+    public void parseNetworkResponse_withInAppBrowserAgent_shouldSucceed() {
+        defaultHeaders.put(ResponseHeader.BROWSER_AGENT.getKey(), "0");
+
+        NetworkResponse testResponse =
+                new NetworkResponse(200, "abc".getBytes(Charset.defaultCharset()), defaultHeaders, false);
+
+        final Response<AdResponse> response = subject.parseNetworkResponse(testResponse);
+        assertThat(response.result.getBrowserAgent()).isEqualTo(BrowserAgent.IN_APP);
+    }
+
+    @Test
+    public void parseNetworkResponse_withNativeBrowserAgent_shouldSucceed() {
+        defaultHeaders.put(ResponseHeader.BROWSER_AGENT.getKey(), "1");
+
+        NetworkResponse testResponse =
+                new NetworkResponse(200, "abc".getBytes(Charset.defaultCharset()), defaultHeaders, false);
+
+        final Response<AdResponse> response = subject.parseNetworkResponse(testResponse);
+        assertThat(response.result.getBrowserAgent()).isEqualTo(BrowserAgent.NATIVE);
+    }
+
+    @Test
+    public void parseNetworkResponse_withNullBrowserAgent_shouldDefaultToInApp() {
+        defaultHeaders.put(ResponseHeader.BROWSER_AGENT.getKey(), null);
+
+        NetworkResponse testResponse =
+                new NetworkResponse(200, "abc".getBytes(Charset.defaultCharset()), defaultHeaders, false);
+
+        final Response<AdResponse> response = subject.parseNetworkResponse(testResponse);
+        assertThat(response.result.getBrowserAgent()).isEqualTo(BrowserAgent.IN_APP);
+    }
+
+    @Test
+    public void parseNetworkResponse_withUndefinedBrowserAgent_shouldDefaultToInApp() {
+        defaultHeaders.put(ResponseHeader.BROWSER_AGENT.getKey(), "foo");
+
+        NetworkResponse testResponse =
+                new NetworkResponse(200, "abc".getBytes(Charset.defaultCharset()), defaultHeaders, false);
+
+        final Response<AdResponse> response = subject.parseNetworkResponse(testResponse);
+        assertThat(response.result.getBrowserAgent()).isEqualTo(BrowserAgent.IN_APP);
+    }
+
+    @Test
     public void deliverResponse_shouldCallListenerOnSuccess() throws Exception {
         subject.deliverResponse(mockAdResponse);
         verify(mockListener).onSuccess(mockAdResponse);
@@ -429,8 +490,6 @@ public class AdRequestTest {
         activity.getResources().getConfiguration().locale = new Locale(" ");
 
         assertThat(subject.getHeaders()).isEqualTo(expectedHeaders);
-
-
     }
 
     @Test

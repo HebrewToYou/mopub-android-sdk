@@ -58,6 +58,7 @@ public class AdViewController {
     @Nullable private WebViewAdUrlGenerator mUrlGenerator;
 
     @Nullable private AdResponse mAdResponse;
+    @Nullable private String mCustomEventClassName;
     private final Runnable mRefreshRunnable;
     @NonNull private final AdRequest.Listener mAdListener;
 
@@ -138,6 +139,7 @@ public class AdViewController {
     void onAdLoadSuccess(@NonNull final AdResponse adResponse) {
         mBackoffPower = 1;
         mAdResponse = adResponse;
+        mCustomEventClassName = adResponse.getCustomEventClassName();
         // Do other ad loading setup. See AdFetcher & AdLoadTask.
         mTimeoutMilliseconds = mAdResponse.getAdTimeoutMillis() == null
                 ? mTimeoutMilliseconds
@@ -249,10 +251,15 @@ public class AdViewController {
         loadNonJavascript(adUrl);
     }
 
-    void loadNonJavascript(String url) {
-        if (url == null) return;
+    void loadNonJavascript(@Nullable final String url) {
+        if (url == null) {
+            return;
+        }
 
-        MoPubLog.d("Loading url: " + url);
+        if (!url.startsWith("javascript:")) {
+            MoPubLog.d("Loading url: " + url);
+        }
+
         if (mIsLoading) {
             if (!TextUtils.isEmpty(mAdUnitId)) {  // This shouldn't be able to happen?
                 MoPubLog.i("Already loading an ad for " + mAdUnitId + ", wait to finish.");
@@ -319,6 +326,11 @@ public class AdViewController {
 
     public String getAdUnitId() {
         return mAdUnitId;
+    }
+
+    @Nullable
+    public String getCustomEventClassName() {
+        return mCustomEventClassName;
     }
 
     public void setAdUnitId(@NonNull String adUnitId) {

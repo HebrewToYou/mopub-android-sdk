@@ -43,7 +43,7 @@ public class InterstitialDetailFragment extends Fragment implements Interstitial
                 mMoPubInterstitial.load();
             }
         });
-        mShowButton = (Button) view.findViewById(R.id.interstitial_show_button);
+        mShowButton = views.mShowButton;
         mShowButton.setEnabled(false);
         mShowButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +74,7 @@ public class InterstitialDetailFragment extends Fragment implements Interstitial
 
     @Override
     public void onInterstitialFailed(MoPubInterstitial interstitial, MoPubErrorCode errorCode) {
+        mShowButton.setEnabled(false);
         final String errorMessage = (errorCode != null) ? errorCode.toString() : "";
         logToast(getActivity(), "Interstitial failed to load: " + errorMessage);
     }
